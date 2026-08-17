@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="128" height="128">
+  <!-- Blue Circular Avatar Background (#1976d2) -->
+  <circle cx="64" cy="64" r="64" fill="#1976d2" />
+  
+  <!-- White Briefcase Icon (WorkIcon) -->
+  <!-- Briefcase Handle -->
+  <path d="M46 44 C46 36, 52 30, 64 30 C76 30, 82 36, 82 44 V48 H46 V44 Z M54 44 H74 V40 C74 37, 70 35, 64 35 C58 35, 54 37, 54 40 V44 Z" fill="#ffffff" />
+  
+  <!-- Briefcase Body -->
+  <rect x="24" y="46" width="80" height="54" rx="8" ry="8" fill="#ffffff" />
+  
+  <!-- Briefcase Center Latch Divider / Detail -->
+  <rect x="58" y="46" width="12" height="16" rx="2" fill="#1976d2" />
+  <rect x="61" y="52" width="6" height="6" rx="1" fill="#ffffff" />
+</svg>

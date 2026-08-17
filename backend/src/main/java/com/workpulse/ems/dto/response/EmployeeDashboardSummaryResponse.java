@@ -1,0 +1,17 @@
+package com.workpulse.ems.dto.response;
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class EmployeeDashboardSummaryResponse {
+
+    private EmployeeResponse profile;
+    private AttendanceResponse todayAttendance;
+    private SalaryResponse latestSalary;
+}
