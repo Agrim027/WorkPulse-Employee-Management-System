@@ -1,7 +1,7 @@
 # WorkPulse — Production Deployment Guide
 
 This guide provides step-by-step instructions for deploying **WorkPulse** to production cloud platforms:
-- **Backend & Database**: Render (Spring Boot Web Service + Managed PostgreSQL)
+- **Backend & Database**: Render (Docker Web Service + Managed PostgreSQL)
 - **Frontend**: Vercel (React 18 + Vite SPA)
 
 ---
@@ -11,14 +11,14 @@ This guide provides step-by-step instructions for deploying **WorkPulse** to pro
 ```
 +-------------------------------------------------------+
 |                 Vercel (Frontend SPA)                 |
-|             https://workpulse.vercel.app              |
+|            <VERCEL_FRONTEND_URL>                      |
 +-------------------------------------------------------+
                            |
                  HTTPS REST API Calls
                            v
 +-------------------------------------------------------+
-|             Render (Spring Boot Backend)              |
-|        https://workpulse-backend.onrender.com         |
+|        Render (Spring Boot Docker Backend)            |
+|       https://workpulse-backend.onrender.com          |
 +-------------------------------------------------------+
                            |
                      JDBC Connection
@@ -41,11 +41,7 @@ This guide provides step-by-step instructions for deploying **WorkPulse** to pro
    - **Region**: Oregon (US West) or closest region
    - **Plan**: Free Tier
 4. Click **Create Database**.
-5. Once active, copy the **Internal Database URL** and **External Database Connection Details**.
-6. Connect using `psql` or DBeaver and execute the database initialization script:
-   ```bash
-   psql "<External_Database_URL>" -f database/schema.sql
-   ```
+5. Once active, note the connection details for configuring the backend Web Service.
 
 ---
 
@@ -54,24 +50,29 @@ This guide provides step-by-step instructions for deploying **WorkPulse** to pro
 1. In Render Dashboard, click **New +** $\rightarrow$ **Web Service**.
 2. Connect your GitHub repository: `https://github.com/Agrim027/WorkPulse-Employee-Management-System`.
 3. Configure settings:
+   - **Provider**: Render Web Service
    - **Name**: `workpulse-backend`
    - **Root Directory**: `backend`
-   - **Runtime**: `Java`
-   - **Build Command**: `./mvnw clean package -DskipTests`
-   - **Start Command**: `java -jar target/ems-0.0.1-SNAPSHOT.jar`
+   - **Runtime**: `Docker`
+   - **Region**: Oregon
+   - **Dockerfile**: `backend/Dockerfile`
    - **Plan**: Free Tier
 4. Add the following **Environment Variables**:
 
-| Variable Name | Example Production Value |
+| Variable Name | Value Placeholder / Value |
 | :--- | :--- |
-| `DB_URL` | `jdbc:postgresql://<render-db-host>:5432/workpulse_db?sslmode=require` |
-| `DB_USERNAME` | `<render-db-username>` |
-| `DB_PASSWORD` | `<render-db-password>` |
-| `JWT_SECRET` | `404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970` |
+| `DB_URL` | `jdbc:postgresql://<RENDER_DATABASE_HOST>:5432/<RENDER_DATABASE_NAME>?sslmode=require` |
+| `DB_USERNAME` | `<RENDER_DATABASE_USERNAME>` |
+| `DB_PASSWORD` | `<RENDER_DATABASE_PASSWORD>` |
+| `JWT_SECRET` | `<PRODUCTION_JWT_SECRET>` |
 | `JWT_EXPIRATION_MS` | `86400000` |
-| `SPRING_JPA_HIBERNATE_DDL_AUTO` | `validate` |
+| `FRONTEND_ALLOWED_ORIGIN` | `<VERCEL_FRONTEND_URL>` |
 
-5. Click **Create Web Service**. Once deployed, copy your backend URL (e.g., `https://workpulse-backend.onrender.com`).
+> **Note on PORT**: The `PORT` environment variable is supplied automatically by Render (e.g., port 10000). The Spring Boot configuration resolves `server.port` via `${PORT:${SERVER_PORT:8080}}`, so no manual `PORT` variable needs to be set.
+
+> **CRITICAL SECURITY REQUIREMENT**: The production `JWT_SECRET` must be a high-entropy secret (at least 256 bits / 32 bytes hex or base64 string) generated securely in your deployment environment. **NEVER** commit real production JWT secrets, database passwords, or credentials to Git.
+
+5. Click **Create Web Service**. Once deployed, copy your backend service URL (e.g., `https://workpulse-backend.onrender.com`).
 
 ---
 
@@ -89,7 +90,7 @@ This guide provides step-by-step instructions for deploying **WorkPulse** to pro
 
 | Variable Name | Value |
 | :--- | :--- |
-| `VITE_API_BASE_URL` | `https://workpulse-backend.onrender.com/api/v1` |
+| `VITE_API_BASE_URL` | `https://<RENDER_BACKEND_APP>.onrender.com/api/v1` |
 
 6. Click **Deploy**. Vercel will build and publish your application.
 
@@ -98,7 +99,7 @@ This guide provides step-by-step instructions for deploying **WorkPulse** to pro
 ## Step 4 — Verification Checklist
 
 - [x] **GitHub Repository**: [https://github.com/Agrim027/WorkPulse-Employee-Management-System](https://github.com/Agrim027/WorkPulse-Employee-Management-System)
-- [ ] **Backend Health**: `GET https://workpulse-backend.onrender.com/api/v1/auth/me`
-- [ ] **Frontend Application**: Login with default credentials (`adminuser` / `Password123!`)
-- [ ] **Role Badge**: Header displays `ADMIN`
-- [ ] **Dashboard**: Displays metric cards for Total Employees, Departments, Today's Attendance, Total Payroll (`₹`)
+- [ ] **Backend Health**: `GET https://<RENDER_BACKEND_APP>.onrender.com/api/v1/auth/me`
+- [ ] **Frontend Application**: Access deployed Vercel frontend URL
+- [ ] **Authentication**: Login with configured credentials
+- [ ] **Dashboard**: Verify API connectivity and UI responsiveness
