@@ -6,6 +6,7 @@ import com.workpulse.ems.entity.Employee;
 import com.workpulse.ems.entity.Salary;
 import com.workpulse.ems.entity.enums.AttendanceStatus;
 import com.workpulse.ems.entity.enums.EmploymentStatus;
+import com.workpulse.ems.entity.enums.PaymentStatus;
 import com.workpulse.ems.repository.*;
 import com.workpulse.ems.service.DashboardService;
 import com.workpulse.ems.service.EmployeeProvisioningService;
