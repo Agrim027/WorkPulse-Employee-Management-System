@@ -27,5 +27,5 @@ jwt:
   expirationMs: ${JWT_EXPIRATION_MS:86400000}
 
 frontend:
-  allowed-origin: ${FRONTEND_ALLOWED_ORIGIN:http://localhost:5173}
+  allowed-origin: ${FRONTEND_ALLOWED_ORIGIN:http://localhost:5173,https://workpulse-em-system.vercel.app,https://*.vercel.app}
 
