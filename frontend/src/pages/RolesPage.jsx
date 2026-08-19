@@ -53,7 +53,9 @@ export default function RolesPage() {
       setError('');
       const res = await roleService.getRoles();
       if (res.data) {
-        setRoles(Array.isArray(res.data) ? res.data : res.data.content || []);
+        const payload = res.data.data !== undefined ? res.data.data : res.data;
+        const list = Array.isArray(payload) ? payload : payload?.content || [];
+        setRoles(list);
       }
     } catch (err) {
       if (err.response?.status === 403) {

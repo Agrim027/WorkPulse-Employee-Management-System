@@ -60,8 +60,10 @@ export default function SalaryFormModal({ open, onClose, onSuccess, initialValue
   const fetchEmployees = async () => {
     try {
       const res = await employeeService.getEmployees({ page: 0, size: 100 });
-      if (res.data && res.data.content) {
-        setEmployees(res.data.content);
+      if (res.data) {
+        const payload = res.data.data !== undefined ? res.data.data : res.data;
+        const list = payload.content || (Array.isArray(payload) ? payload : []);
+        setEmployees(list);
       }
     } catch (err) {
       console.error('Failed to load employees for salary form:', err);

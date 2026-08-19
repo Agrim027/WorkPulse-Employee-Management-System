@@ -36,8 +36,9 @@ export default function MySalariesPage() {
       const params = { page, size: rowsPerPage };
       const res = await salaryService.getMySalaries(params);
       if (res.data) {
-        setSalaries(res.data.content || []);
-        setTotalElements(res.data.totalElements || 0);
+        const payload = res.data.data !== undefined ? res.data.data : res.data;
+        setSalaries(payload.content || (Array.isArray(payload) ? payload : []));
+        setTotalElements(payload.totalElements || (payload.content ? payload.content.length : 0));
       }
     } catch (err) {
       setError(err.response?.data?.message || err.message || 'Failed to fetch personal salary slips.');

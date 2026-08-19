@@ -46,8 +46,9 @@ export default function MyAttendancePage() {
       const params = { page, size: rowsPerPage };
       const res = await attendanceService.getMyAttendance(params);
       if (res.data) {
-        setRecords(res.data.content || []);
-        setTotalElements(res.data.totalElements || 0);
+        const payload = res.data.data !== undefined ? res.data.data : res.data;
+        setRecords(payload.content || (Array.isArray(payload) ? payload : []));
+        setTotalElements(payload.totalElements || (payload.content ? payload.content.length : 0));
       }
     } catch (err) {
       setError(err.response?.data?.message || err.message || 'Failed to fetch personal attendance logs.');

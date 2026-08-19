@@ -50,7 +50,7 @@ export default function EmployeeDetailsPage() {
       setError('');
       const res = await employeeService.getEmployeeById(id);
       if (res.data) {
-        setEmployee(res.data);
+        setEmployee(res.data.data !== undefined ? res.data.data : res.data);
       }
     } catch (err) {
       if (err.response?.status === 403) {

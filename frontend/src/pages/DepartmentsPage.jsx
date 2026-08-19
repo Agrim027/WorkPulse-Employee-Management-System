@@ -52,7 +52,9 @@ export default function DepartmentsPage() {
       setError('');
       const res = await departmentService.getDepartments();
       if (res.data) {
-        setDepartments(Array.isArray(res.data) ? res.data : res.data.content || []);
+        const payload = res.data.data !== undefined ? res.data.data : res.data;
+        const list = Array.isArray(payload) ? payload : payload?.content || [];
+        setDepartments(list);
       }
     } catch (err) {
       setError(err.response?.data?.message || err.message || 'Failed to fetch departments.');

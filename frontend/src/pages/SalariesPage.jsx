@@ -78,8 +78,9 @@ export default function SalariesPage() {
 
       const res = await salaryService.getSalaries(params);
       if (res.data) {
-        setSalaryRecords(res.data.content || []);
-        setTotalElements(res.data.totalElements || 0);
+        const payload = res.data.data !== undefined ? res.data.data : res.data;
+        setSalaryRecords(payload.content || (Array.isArray(payload) ? payload : []));
+        setTotalElements(payload.totalElements || (payload.content ? payload.content.length : 0));
       }
     } catch (err) {
       setError(err.response?.data?.message || err.message || 'Failed to load salary records.');
@@ -91,8 +92,10 @@ export default function SalariesPage() {
   const fetchEmployeesList = async () => {
     try {
       const res = await employeeService.getEmployees({ page: 0, size: 100 });
-      if (res.data && res.data.content) {
-        setEmployees(res.data.content);
+      if (res.data) {
+        const payload = res.data.data !== undefined ? res.data.data : res.data;
+        const list = payload.content || (Array.isArray(payload) ? payload : []);
+        setEmployees(list);
       }
     } catch (err) {
       console.error('Failed to load employees for salary filter:', err);

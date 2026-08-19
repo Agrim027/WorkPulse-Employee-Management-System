@@ -51,10 +51,10 @@ export default function DashboardPage() {
       setError('');
       if (isAdminOrHr) {
         const res = await dashboardService.getAdminSummary();
-        if (res.data) setAdminSummary(res.data);
+        if (res.data) setAdminSummary(res.data.data !== undefined ? res.data.data : res.data);
       } else {
         const res = await dashboardService.getEmployeeSummary();
-        if (res.data) setEmployeeSummary(res.data);
+        if (res.data) setEmployeeSummary(res.data.data !== undefined ? res.data.data : res.data);
       }
     } catch (err) {
       setError(err.response?.data?.message || err.message || 'Failed to load dashboard statistics.');

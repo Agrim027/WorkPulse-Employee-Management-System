@@ -81,8 +81,9 @@ export default function EmployeesPage() {
 
       const res = await employeeService.getEmployees(params);
       if (res.data) {
-        setEmployees(res.data.content || []);
-        setTotalElements(res.data.totalElements || 0);
+        const payload = res.data.data !== undefined ? res.data.data : res.data;
+        setEmployees(payload.content || (Array.isArray(payload) ? payload : []));
+        setTotalElements(payload.totalElements || (payload.content ? payload.content.length : 0));
       }
     } catch (err) {
       setError(err.response?.data?.message || err.message || 'Failed to load employee list.');
@@ -94,8 +95,10 @@ export default function EmployeesPage() {
   const fetchDepartments = async () => {
     try {
       const res = await departmentService.getDepartments({ page: 0, size: 100 });
-      if (res.data && res.data.content) {
-        setDepartments(res.data.content);
+      if (res.data) {
+        const payload = res.data.data !== undefined ? res.data.data : res.data;
+        const list = Array.isArray(payload) ? payload : payload.content || [];
+        setDepartments(list);
       }
     } catch (err) {
       console.error('Failed to fetch departments:', err);

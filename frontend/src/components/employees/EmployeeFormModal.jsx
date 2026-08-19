@@ -66,8 +66,10 @@ export default function EmployeeFormModal({ open, onClose, onSuccess, initialVal
   const fetchDepartments = async () => {
     try {
       const res = await departmentService.getDepartments({ page: 0, size: 100 });
-      if (res.data && res.data.content) {
-        setDepartments(res.data.content);
+      if (res.data) {
+        const payload = res.data.data !== undefined ? res.data.data : res.data;
+        const list = Array.isArray(payload) ? payload : payload.content || [];
+        setDepartments(list);
       }
     } catch (err) {
       console.error('Failed to load departments for employee form:', err);
