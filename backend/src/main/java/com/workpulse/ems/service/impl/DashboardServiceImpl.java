@@ -11,6 +11,7 @@ import com.workpulse.ems.entity.enums.PaymentStatus;
 import com.workpulse.ems.exception.ResourceNotFoundException;
 import com.workpulse.ems.repository.*;
 import com.workpulse.ems.service.DashboardService;
+import com.workpulse.ems.service.EmployeeProvisioningService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,7 +30,7 @@ public class DashboardServiceImpl implements DashboardService {
     private final DepartmentRepository departmentRepository;
     private final AttendanceRepository attendanceRepository;
     private final SalaryRepository salaryRepository;
-    private final UserRepository userRepository;
+    private final EmployeeProvisioningService employeeProvisioningService;
 
     @Override
     public DashboardSummaryResponse getAdminSummary() {
@@ -88,11 +89,7 @@ public class DashboardServiceImpl implements DashboardService {
 
     @Override
     public EmployeeDashboardSummaryResponse getEmployeeSummary(String username) {
-        User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found with username: " + username));
-
-        Employee employee = employeeRepository.findByUserId(user.getId())
-                .orElseThrow(() -> new ResourceNotFoundException("Employee profile not found for user: " + username));
+        Employee employee = employeeProvisioningService.getOrCreateEmployeeForUsername(username);
 
         LocalDate today = LocalDate.now();
         Optional<Attendance> todayAttendanceOpt = attendanceRepository.findByEmployeeIdAndAttendanceDate(employee.getId(), today);

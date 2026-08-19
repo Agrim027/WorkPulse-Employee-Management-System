@@ -2,8 +2,10 @@ package com.workpulse.ems.security.services;
 
 import com.workpulse.ems.entity.Employee;
 import com.workpulse.ems.entity.User;
+import com.workpulse.ems.entity.enums.ERole;
 import com.workpulse.ems.repository.EmployeeRepository;
 import com.workpulse.ems.repository.UserRepository;
+import com.workpulse.ems.service.EmployeeProvisioningService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -17,9 +19,10 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 
     private final UserRepository userRepository;
     private final EmployeeRepository employeeRepository;
+    private final EmployeeProvisioningService employeeProvisioningService;
 
     @Override
-    @Transactional(readOnly = true)
+    @Transactional
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         User user = userRepository.findByUsername(username)
                 .orElseGet(() -> userRepository.findByEmail(username)
@@ -27,7 +30,14 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 
         Long employeeId = employeeRepository.findByUserId(user.getId())
                 .map(Employee::getId)
-                .orElse(null);
+                .orElseGet(() -> {
+                    boolean isAdmin = user.getRoles().stream()
+                            .anyMatch(r -> r.getName() == ERole.ROLE_ADMIN);
+                    if (!isAdmin) {
+                        return employeeProvisioningService.getOrCreateEmployeeForUser(user).getId();
+                    }
+                    return null;
+                });
 
         return UserDetailsImpl.build(user, employeeId);
     }

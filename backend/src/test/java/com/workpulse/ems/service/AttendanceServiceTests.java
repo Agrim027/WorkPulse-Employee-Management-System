@@ -38,6 +38,9 @@ public class AttendanceServiceTests {
     @Mock
     private EmployeeRepository employeeRepository;
 
+    @Mock
+    private EmployeeProvisioningService employeeProvisioningService;
+
     @InjectMocks
     private AttendanceServiceImpl attendanceService;
 
@@ -126,8 +129,8 @@ public class AttendanceServiceTests {
                 List.of(new SimpleGrantedAuthority("ROLE_EMPLOYEE"))
         );
 
+        when(employeeProvisioningService.getOrCreateEmployeeForUserId(100L)).thenReturn(sampleEmployee);
         when(attendanceRepository.existsByEmployeeIdAndAttendanceDate(10L, LocalDate.now())).thenReturn(false);
-        when(employeeRepository.findById(10L)).thenReturn(Optional.of(sampleEmployee));
         when(attendanceRepository.save(any(Attendance.class))).thenReturn(sampleAttendance);
 
         AttendanceResponse response = attendanceService.checkIn(employeeUser);
@@ -142,6 +145,7 @@ public class AttendanceServiceTests {
                 List.of(new SimpleGrantedAuthority("ROLE_EMPLOYEE"))
         );
 
+        when(employeeProvisioningService.getOrCreateEmployeeForUserId(100L)).thenReturn(sampleEmployee);
         when(attendanceRepository.existsByEmployeeIdAndAttendanceDate(10L, LocalDate.now())).thenReturn(true);
 
         assertThrows(DuplicateResourceException.class, () -> attendanceService.checkIn(employeeUser));
@@ -155,6 +159,7 @@ public class AttendanceServiceTests {
                 List.of(new SimpleGrantedAuthority("ROLE_EMPLOYEE"))
         );
 
+        when(employeeProvisioningService.getOrCreateEmployeeForUserId(100L)).thenReturn(sampleEmployee);
         when(attendanceRepository.findByEmployeeIdAndAttendanceDate(10L, LocalDate.now())).thenReturn(Optional.empty());
 
         assertThrows(BadRequestException.class, () -> attendanceService.checkOut(employeeUser));

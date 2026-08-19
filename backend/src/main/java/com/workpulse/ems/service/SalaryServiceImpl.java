@@ -14,6 +14,7 @@ import com.workpulse.ems.exception.ResourceNotFoundException;
 import com.workpulse.ems.repository.EmployeeRepository;
 import com.workpulse.ems.repository.SalaryRepository;
 import com.workpulse.ems.security.services.UserDetailsImpl;
+import com.workpulse.ems.service.EmployeeProvisioningService;
 import jakarta.persistence.criteria.Predicate;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -36,6 +37,7 @@ public class SalaryServiceImpl implements SalaryService {
 
     private final SalaryRepository salaryRepository;
     private final EmployeeRepository employeeRepository;
+    private final EmployeeProvisioningService employeeProvisioningService;
 
     @Override
     @Transactional(readOnly = true)
@@ -84,12 +86,10 @@ public class SalaryServiceImpl implements SalaryService {
     }
 
     @Override
-    @Transactional(readOnly = true)
+    @Transactional
     public Page<SalaryResponse> getMySalaries(UserDetailsImpl userDetails, Pageable pageable) {
-        Long employeeId = userDetails.getEmployeeId();
-        if (employeeId == null) {
-            throw new BadRequestException("Authenticated user is not linked to an employee profile");
-        }
+        Employee employee = employeeProvisioningService.getOrCreateEmployeeForUserId(userDetails.getId());
+        Long employeeId = employee.getId();
 
         Specification<Salary> spec = (root, query, cb) ->
                 cb.equal(root.get("employee").get("id"), employeeId);

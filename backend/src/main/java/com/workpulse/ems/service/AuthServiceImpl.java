@@ -38,6 +38,7 @@ public class AuthServiceImpl implements AuthService {
     private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtUtils jwtUtils;
+    private final EmployeeProvisioningService employeeProvisioningService;
 
     @Override
     public JwtResponse authenticateUser(LoginRequest loginRequest) {
@@ -97,7 +98,11 @@ public class AuthServiceImpl implements AuthService {
         }
         user.setRoles(roles);
 
-        userRepository.save(user);
+        User savedUser = userRepository.save(user);
+
+        if (!roles.stream().anyMatch(r -> r.getName() == ERole.ROLE_ADMIN)) {
+            employeeProvisioningService.getOrCreateEmployeeForUser(savedUser);
+        }
 
         return ApiResponse.success("User registered successfully!");
     }

@@ -36,6 +36,7 @@ public class AttendanceServiceImpl implements AttendanceService {
 
     private final AttendanceRepository attendanceRepository;
     private final EmployeeRepository employeeRepository;
+    private final EmployeeProvisioningService employeeProvisioningService;
 
     @Override
     @Transactional(readOnly = true)
@@ -93,12 +94,10 @@ public class AttendanceServiceImpl implements AttendanceService {
     }
 
     @Override
-    @Transactional(readOnly = true)
+    @Transactional
     public Page<AttendanceResponse> getMyAttendance(UserDetailsImpl userDetails, Pageable pageable) {
-        Long employeeId = userDetails.getEmployeeId();
-        if (employeeId == null) {
-            throw new BadRequestException("Authenticated user is not linked to an employee profile");
-        }
+        Employee employee = employeeProvisioningService.getOrCreateEmployeeForUserId(userDetails.getId());
+        Long employeeId = employee.getId();
 
         Specification<Attendance> spec = (root, query, cb) ->
                 cb.equal(root.get("employee").get("id"), employeeId);
@@ -173,18 +172,13 @@ public class AttendanceServiceImpl implements AttendanceService {
     @Override
     @Transactional
     public AttendanceResponse checkIn(UserDetailsImpl userDetails) {
-        Long employeeId = userDetails.getEmployeeId();
-        if (employeeId == null) {
-            throw new BadRequestException("Authenticated user is not linked to an employee profile");
-        }
+        Employee employee = employeeProvisioningService.getOrCreateEmployeeForUserId(userDetails.getId());
+        Long employeeId = employee.getId();
 
         LocalDate today = LocalDate.now();
         if (attendanceRepository.existsByEmployeeIdAndAttendanceDate(employeeId, today)) {
             throw new DuplicateResourceException("Attendance record already exists for today");
         }
-
-        Employee employee = employeeRepository.findById(employeeId)
-                .orElseThrow(() -> new ResourceNotFoundException("Employee profile not found for id: " + employeeId));
 
         Attendance attendance = Attendance.builder()
                 .employee(employee)
@@ -201,10 +195,8 @@ public class AttendanceServiceImpl implements AttendanceService {
     @Override
     @Transactional
     public AttendanceResponse checkOut(UserDetailsImpl userDetails) {
-        Long employeeId = userDetails.getEmployeeId();
-        if (employeeId == null) {
-            throw new BadRequestException("Authenticated user is not linked to an employee profile");
-        }
+        Employee employee = employeeProvisioningService.getOrCreateEmployeeForUserId(userDetails.getId());
+        Long employeeId = employee.getId();
 
         LocalDate today = LocalDate.now();
         Attendance attendance = attendanceRepository.findByEmployeeIdAndAttendanceDate(employeeId, today)

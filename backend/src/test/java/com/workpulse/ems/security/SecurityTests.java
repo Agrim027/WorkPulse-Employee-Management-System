@@ -46,6 +46,9 @@ public class SecurityTests {
     @Mock
     private JwtUtils jwtUtils;
 
+    @Mock
+    private com.workpulse.ems.service.EmployeeProvisioningService employeeProvisioningService;
+
     @InjectMocks
     private AuthServiceImpl authService;
 
