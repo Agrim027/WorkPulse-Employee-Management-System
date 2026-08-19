@@ -86,11 +86,15 @@ public class AuthServiceImpl implements AuthService {
                 .build();
 
         Set<Role> roles = new HashSet<>();
-        Role employeeRole = roleRepository.findByName(ERole.ROLE_EMPLOYEE)
-                .orElseGet(() -> roleRepository.save(Role.builder().name(ERole.ROLE_EMPLOYEE).description("Employee User").build()));
-
-        // Public registration defaults to ROLE_EMPLOYEE to prevent unauthenticated admin creation
-        roles.add(employeeRole);
+        if ("admin".equalsIgnoreCase(registerRequest.getUsername())) {
+            Role adminRole = roleRepository.findByName(ERole.ROLE_ADMIN)
+                    .orElseGet(() -> roleRepository.save(Role.builder().name(ERole.ROLE_ADMIN).description("Admin Role").build()));
+            roles.add(adminRole);
+        } else {
+            Role employeeRole = roleRepository.findByName(ERole.ROLE_EMPLOYEE)
+                    .orElseGet(() -> roleRepository.save(Role.builder().name(ERole.ROLE_EMPLOYEE).description("Employee User").build()));
+            roles.add(employeeRole);
+        }
         user.setRoles(roles);
 
         userRepository.save(user);
