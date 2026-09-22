@@ -3,7 +3,7 @@ spring:
     name: workpulse-ems
 
   datasource:
-    url: ${DB_URL:jdbc:postgresql://localhost:5102/workpulse_db}
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/workpulse_db}
     username: ${DB_USERNAME:postgres}
     password: ${DB_PASSWORD:postgres}
     driver-class-name: org.postgresql.Driver
