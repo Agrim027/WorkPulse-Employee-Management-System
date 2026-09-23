@@ -22,6 +22,7 @@ public class DataInitializer implements CommandLineRunner {
 
     private final RoleRepository roleRepository;
     private final UserRepository userRepository;
+    private final org.springframework.security.crypto.password.PasswordEncoder passwordEncoder;
 
     @Override
     @Transactional
@@ -36,19 +37,33 @@ public class DataInitializer implements CommandLineRunner {
         roleRepository.findByName(ERole.ROLE_EMPLOYEE)
                 .orElseGet(() -> roleRepository.save(Role.builder().name(ERole.ROLE_EMPLOYEE).description("Employee Role").build()));
 
-        // Check if user 'admin' exists and upgrade role to ROLE_ADMIN
-        Optional<User> adminUserOpt = userRepository.findByUsername("admin");
-        if (adminUserOpt.isPresent()) {
-            User adminUser = adminUserOpt.get();
-            boolean hasAdminRole = adminUser.getRoles().stream()
-                    .anyMatch(r -> r.getName() == ERole.ROLE_ADMIN);
+        // Create default 'admin' user if it does not exist
+        if (!userRepository.existsByUsername("admin")) {
+            Set<Role> roles = new HashSet<>();
+            roles.add(adminRole);
+            User adminUser = User.builder()
+                    .username("admin")
+                    .email("admin@workpulse.com")
+                    .password(passwordEncoder.encode("admin123"))
+                    .enabled(true)
+                    .roles(roles)
+                    .build();
+            userRepository.save(adminUser);
+            log.info("Successfully created default admin user (username: admin)");
+        } else {
+            Optional<User> adminUserOpt = userRepository.findByUsername("admin");
+            if (adminUserOpt.isPresent()) {
+                User adminUser = adminUserOpt.get();
+                boolean hasAdminRole = adminUser.getRoles().stream()
+                        .anyMatch(r -> r.getName() == ERole.ROLE_ADMIN);
 
-            if (!hasAdminRole) {
-                Set<Role> roles = new HashSet<>();
-                roles.add(adminRole);
-                adminUser.setRoles(roles);
-                userRepository.save(adminUser);
-                log.info("Successfully updated 'admin' user role to ROLE_ADMIN");
+                if (!hasAdminRole) {
+                    Set<Role> roles = new HashSet<>();
+                    roles.add(adminRole);
+                    adminUser.setRoles(roles);
+                    userRepository.save(adminUser);
+                    log.info("Successfully updated 'admin' user role to ROLE_ADMIN");
+                }
             }
         }
     }
